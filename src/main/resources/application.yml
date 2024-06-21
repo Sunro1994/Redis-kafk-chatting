@@ -1,0 +1,23 @@
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+#      group-id: foo # server 1
+       group-id: boo # server 2
+    template:
+      default-topic: chatroom
+  redis:
+    data:
+      host: localhost
+      port: 6379
+
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: false
+
+  freemarker:
+    cache: false
+    template-loader-path: classpath:/templates
+    suffix: .ftl

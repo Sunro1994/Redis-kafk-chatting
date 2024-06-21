@@ -1,0 +1,68 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.3.1'
+	id 'io.spring.dependency-management' version '1.1.5'
+}
+
+group = 'com.sunro'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+bootJar{
+	archiveFileName ="chatdemo-foo.jar" //server1
+//	 archiveFileName ="chatdemo-boo.jar" //server2
+}
+
+
+
+dependencies {
+	// redis(채팅방 저장용)
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	//freemarker
+	implementation 'org.springframework.boot:spring-boot-starter-freemarker'
+	//webb
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	//web socket
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+	// json
+	implementation 'com.google.code.gson:gson:2.8.0'
+
+	//kafka(pub/sub 구현)
+	implementation 'org.springframework.kafka:spring-kafka'
+
+	// socket client
+	implementation 'org.webjars.bower:bootstrap:4.3.1'
+	implementation 'org.webjars.bower:vue:2.5.16'
+	implementation 'org.webjars.bower:axios:0.17.1'
+	implementation 'org.webjars:sockjs-client:1.1.2'
+	implementation 'org.webjars:stomp-websocket:2.3.3-1'
+
+
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.kafka:spring-kafka-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
