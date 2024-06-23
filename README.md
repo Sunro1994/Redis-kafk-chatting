@@ -64,6 +64,43 @@
     아키텍처는 차후 변경될 수 있습니다 고려해주세요 :)
 ![ChatArchitecture](https://github.com/god-kao-talk/chat-challenge-BE/assets/132982907/d1868b7b-a616-4166-97a6-bee94cbbfc65)
 
+# Deploy & Test
+
+## Build and Run Redis, Kafka
+- 프로젝트 최상위에서 cmd를 열어 수행
+- 현재 docker-compose에는 redis와 kafka를 모두 build하도록 되어 있음
+```
+docker-composeup -d
+```
+- 정상적인 Image pull, container 생성 과정
+![image](https://github.com/Sunro1994/Redis-kafk-chatting/assets/132982907/72fee16a-afce-4475-9ee9-a6a4620d812d)
+    현재 프로젝트에는 redis와 kafka 설정이 함께 설정되어 있습니다. 구분하여 테스트 할 경우 redis 또는 Kafak의관련 어노테이션(@Component, @Configuratoin) 및 설정 파일(.yml)을 주석처리하거나 제거하여 사용해주세요.
+![image](https://github.com/Sunro1994/Redis-kafk-chatting/assets/132982907/3e66a739-f505-4b53-8b6b-6d351b43e89a)
+
+## Build Project
+
+-  **application.yml,build.gradle 파일** 에서 번걸아가며 주석을 풀고 빌드해야한다. 첫 번째로 group-id가 boo인 상태로 build한다.
+두 번째로 group-id가 foo인 상태로 build한다.
+```
+gradlew bootJar
+```
+- 결과로 두 개의 build 결과물이 /build/libs 아래에 생긴걸 볼 수 있다.
+![image](https://github.com/Sunro1994/Redis-kafk-chatting/assets/132982907/fb7c5a8c-f597-4dfb-908e-d748c2be92c1)
+
+## Run Project
+- libs 디렉터리에서 build된 Jar파일을 각각의 cmd에서 실행한다.
+- 채팅을 수행해야 하기 때문에 각각 다른 포트로 생성해야 하며 foo2개 boo2개를 실행시킨다.
+![image](https://github.com/Sunro1994/Redis-kafk-chatting/assets/132982907/1b44cf63-a28b-4e6f-a099-f3bd0cabb369)
+```
+java -jar chatdemo-foo.jar --server.port=8080
+java -jar chatdemo-foo.jar --server.port=8081
+java -jar chatdemo-boo.jar --server.port=8082
+java -jar chatdemo-boo.jar --server.port=8083
+
+```
+
+## Test
+localhost:[각자 포트번호]/chat/room 으로 웹을 열어 채팅방 개설후 채팅
 
 
 # Refrence
