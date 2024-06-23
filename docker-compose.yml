@@ -4,6 +4,7 @@ services:
     image: wurstmeister/zookeeper:3.4.6
     ports:
       - "2181:2181"
+
   kafka:
     image: wurstmeister/kafka:latest
     ports:
@@ -16,3 +17,8 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
