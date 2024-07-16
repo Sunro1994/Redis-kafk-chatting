@@ -1,0 +1,116 @@
+package com.sunro.RedisCreateAuthorNameSuggestion.config;
+
+
+import com.sunro.RedisCreateAuthorNameSuggestion.domain.chat.dto.ChatRoom;
+import com.sunro.RedisCreateAuthorNameSuggestion.domain.chat.service.RedisSubscriber;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.time.Duration;
+
+@Configuration
+@EnableRedisRepositories
+public class RedisConfig {
+
+    @Value("${spring.data.redis.host}")
+    private String redisHost;
+
+    @Value("${spring.data.redis.port}")
+    private int redisPort;
+
+    @Bean
+    public RedisConnectionFactory redisConnectionFactory() {
+        return new LettuceConnectionFactory(redisHost, redisPort);
+    }
+
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate() {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+
+        // Redis를 연결합니다.
+        redisTemplate.setConnectionFactory(redisConnectionFactory());
+
+        // Key-Value 형태로 직렬화를 수행합니다.
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
+
+        // Hash Key-Value 형태로 직렬화를 수행합니다.
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
+
+
+        return redisTemplate;
+    }
+
+    @Bean
+    public ChannelTopic channelTopic() {
+        return new ChannelTopic("chatroom");
+    }
+
+    @Bean
+    public RedisMessageListenerContainer redisMessage(
+            MessageListenerAdapter listenerAdapterChatMessage,
+            ChannelTopic channelTopic
+    ){
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        container.setConnectionFactory(redisConnectionFactory());
+        container.addMessageListener(listenerAdapterChatMessage, channelTopic);
+        return container;
+    }
+
+    /** 실제 메시지를 처리하는 subscriber 설정 추가*/
+    @Bean
+    public MessageListenerAdapter listenerAdapterChatMessage(RedisSubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "sendMessage");
+    }
+
+    @Bean
+    public RedisTemplate<String, ChatRoom> chatRoomRedisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, ChatRoom> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+
+        // Use StringRedisSerializer for keys
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setHashKeySerializer(new StringRedisSerializer());
+
+        // Use Jackson2JsonRedisSerializer for ChatRoom values
+        Jackson2JsonRedisSerializer<ChatRoom> serializer = new Jackson2JsonRedisSerializer<>(ChatRoom.class);
+        template.setValueSerializer(serializer);
+        template.setHashValueSerializer(serializer);
+
+        return template;
+    }
+
+
+
+    @Bean
+    public CacheManager cacheManager() {
+        RedisCacheManager.RedisCacheManagerBuilder builder=
+                RedisCacheManager.RedisCacheManagerBuilder.fromConnectionFactory(redisConnectionFactory());
+
+        RedisCacheConfiguration configuration = RedisCacheConfiguration.
+                defaultCacheConfig().
+                serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer())) //Value Serializer 변경
+                .entryTtl(Duration.ofMinutes(5));//캐시 수명 5분
+        builder.cacheDefaults(configuration);
+        return builder.build();
+    }
+}
+
+
+

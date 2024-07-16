@@ -1,7 +1,7 @@
-package com.sunro.kafka_redis_chatting.domain.controller;
+package com.sunro.RedisCreateAuthorNameSuggestion.domain.chat.controller;
 
-import com.sunro.kafka_redis_chatting.domain.model.ChatRoom;
-import com.sunro.kafka_redis_chatting.domain.repository.ChatRoomRepository;
+import com.sunro.RedisCreateAuthorNameSuggestion.domain.chat.dto.ChatRoom;
+import com.sunro.RedisCreateAuthorNameSuggestion.domain.chat.repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -9,10 +9,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
 @RequiredArgsConstructor
+@Controller
 @RequestMapping("/chat")
 public class ChatRoomController {
+
     private final ChatRoomRepository chatRoomRepository;
 
     @GetMapping("/room")

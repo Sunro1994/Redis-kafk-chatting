@@ -1,13 +1,13 @@
-package com.sunro.kafka_redis_chatting;
+package com.sunro.RedisCreateAuthorNameSuggestion;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class KafkaRedisChattingApplication {
+public class RedisCreateAuthorNameSuggestionApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(KafkaRedisChattingApplication.class, args);
+		SpringApplication.run(RedisCreateAuthorNameSuggestionApplication.class, args);
 	}
 
 }

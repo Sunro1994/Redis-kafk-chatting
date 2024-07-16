@@ -1,23 +1,29 @@
+#Redis Configuration
 spring:
-  kafka:
-    bootstrap-servers: localhost:9092
-    consumer:
-#      group-id: foo # server 1
-       group-id: boo # server 2
-    template:
-      default-topic: chatroom
-  redis:
-    data:
-      host: localhost
-      port: 6379
+  data:
+    redis:
+      host : localhost
+      port : 6379
+  cache:
+    type: redis
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: sunro
+    password: leesunro12
+    url: jdbc:mysql://localhost:3306/redisTest?serverTimezone=Asia/Seoul
 
-  devtools:
-    livereload:
-      enabled: true
-    restart:
-      enabled: false
 
   freemarker:
     cache: false
     template-loader-path: classpath:/templates
     suffix: .ftl
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        show_sql: true
+        format_sql: true
+    hibernate:
+      ddl-auto: update
+

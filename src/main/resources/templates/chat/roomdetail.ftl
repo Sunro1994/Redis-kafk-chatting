@@ -70,6 +70,7 @@
                 this.message = '';
             },
             recvMessage: function(recv) {
+                log.info(recv.message)
                 this.messages.unshift({"type":recv.type,"sender":recv.type=='ENTER'?'[알림]':recv.sender,"message":recv.message})
             }
         }
@@ -86,7 +87,7 @@
         }, function(error) {
             if(reconnect++ < 5) {
                 setTimeout(function() {
-                    // console.log("connection reconnect");
+                    console.log("connection reconnect");
                     sock = new SockJS("/ws-stomp");
                     ws = Stomp.over(sock);
                     connect();

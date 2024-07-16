@@ -1,16 +1,13 @@
-package com.sunro.kafka_redis_chatting.domain.model;
+package com.sunro.RedisCreateAuthorNameSuggestion.domain.chat.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.UUID;
 
-/**
- * Redis에 저장되는 객체들은 Serialize 가능해야 함
- */
-@Getter @Setter
+@Data
 public class ChatRoom implements Serializable {
+
     private static final long serialVersionUID = 6494678977089006639L;
 
     private String roomId;
