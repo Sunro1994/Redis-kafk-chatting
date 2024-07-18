@@ -39,25 +39,6 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, Object> redisTemplate() {
-        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
-
-        // Redis를 연결합니다.
-        redisTemplate.setConnectionFactory(redisConnectionFactory());
-
-        // Key-Value 형태로 직렬화를 수행합니다.
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
-
-        // Hash Key-Value 형태로 직렬화를 수행합니다.
-        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-        redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
-
-
-        return redisTemplate;
-    }
-
-    @Bean
     public ChannelTopic channelTopic() {
         return new ChannelTopic("chatroom");
     }
@@ -76,12 +57,12 @@ public class RedisConfig {
     /** 실제 메시지를 처리하는 subscriber 설정 추가*/
     @Bean
     public MessageListenerAdapter listenerAdapterChatMessage(RedisSubscriber subscriber) {
-        return new MessageListenerAdapter(subscriber, "sendMessage");
+        return new MessageListenerAdapter(subscriber, "onMessage");
     }
 
     @Bean
-    public RedisTemplate<String, ChatRoom> chatRoomRedisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, ChatRoom> template = new RedisTemplate<>();
+    public RedisTemplate<String, Object> chatRoomRedisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
         // Use StringRedisSerializer for keys

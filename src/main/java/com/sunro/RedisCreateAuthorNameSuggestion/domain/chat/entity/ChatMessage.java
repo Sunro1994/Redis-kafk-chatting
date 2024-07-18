@@ -1,22 +1,15 @@
 package com.sunro.RedisCreateAuthorNameSuggestion.domain.chat.entity;
 
-import com.sunro.RedisCreateAuthorNameSuggestion.domain.chat.constant.MessageType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.sunro.RedisCreateAuthorNameSuggestion.domain.chat.constant.Type;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Getter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder(toBuilder = true)
 public class ChatMessage {
-
-    private MessageType messageType;
+    private Type type;
     private String roomId;
     private String sender;
     private String message;

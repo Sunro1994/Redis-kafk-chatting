@@ -1,5 +1,5 @@
 package com.sunro.RedisCreateAuthorNameSuggestion.domain.chat.constant;
 
-public enum MessageType {
+public enum Type {
     ENTER, TALK
 }

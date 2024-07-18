@@ -18,7 +18,7 @@
         <div class="col-md-12">
             <h3>채팅방 리스트</h3>
         </div>
-    </div>
+    </div>-
     <div class="input-group">
         <div class="input-group-prepend">
             <label class="input-group-text">방제목</label>

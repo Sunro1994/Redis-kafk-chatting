@@ -4,6 +4,7 @@ import com.sunro.RedisCreateAuthorNameSuggestion.domain.chat.dto.ChatRoom;
 import com.sunro.RedisCreateAuthorNameSuggestion.domain.chat.service.RedisSubscriber;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
@@ -16,14 +17,15 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Repository
+@Slf4j
 public class ChatRoomRepository {
-    // 채팅방(topic)에 발행되는 메시지를 처리할 Listner
+    // 채팅방(topic)에 발행되는 메시지를 처리할 Listener
     private final RedisMessageListenerContainer redisMessageListener;
     // 구독 처리 서비스
     private final RedisSubscriber redisSubscriber;
     // Redis
     private static final String CHAT_ROOMS = "CHAT_ROOM";
-    private final RedisTemplate<String, ChatRoom> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
     private HashOperations<String, String, ChatRoom> opsHashChatRoom;
     // 채팅방의 대화 메시지를 발행하기 위한 redis topic 정보. 서버별로 채팅방에 매치되는 topic정보를 Map에 넣어 roomId로 찾을수 있도록 한다.
     private Map<String, ChannelTopic> topics;
@@ -32,13 +34,17 @@ public class ChatRoomRepository {
     private void init() {
         opsHashChatRoom = redisTemplate.opsForHash();
         topics = new HashMap<>();
+        log.info("ChatRoomRepository initialized.");
+
     }
 
     public List<ChatRoom> findAllRoom() {
+        log.info("Fetching all chat rooms.");
         return opsHashChatRoom.values(CHAT_ROOMS);
     }
 
     public ChatRoom findRoomById(String id) {
+        log.info("Fetching chat room with id={}", id);
         return opsHashChatRoom.get(CHAT_ROOMS, id);
     }
 
@@ -48,6 +54,7 @@ public class ChatRoomRepository {
     public ChatRoom createChatRoom(String name) {
         ChatRoom chatRoom = ChatRoom.create(name);
         opsHashChatRoom.put(CHAT_ROOMS, chatRoom.getRoomId(), chatRoom);
+        log.info("Created chat room with id={} and name={}", chatRoom.getRoomId(), chatRoom.getName());
         return chatRoom;
     }
 
@@ -55,19 +62,24 @@ public class ChatRoomRepository {
      * 채팅방 입장 : redis에 topic을 만들고 pub/sub 통신을 하기 위해 리스너를 설정한다.
      */
     public void enterChatRoom(String roomId) {
-        // 이미 존재하는 경우에는 처리하지 않습니다.
-        if (topics.containsKey(roomId)) {
-            return;
-        }
+        ChannelTopic topic = topics.get(roomId);
+        if (topic == null) {
+            topic = new ChannelTopic(roomId);
+            redisMessageListener.addMessageListener(redisSubscriber, topic);
+            topics.put(roomId, topic);
 
-        // 채팅방의 topic을 생성하여 저장합니다.
-        ChannelTopic topic = new ChannelTopic(roomId);
-        redisMessageListener.addMessageListener(redisSubscriber, topic);
-        topics.put(roomId, topic);
+            log.info("Created and stored new topic for roomId={}", roomId);
+        } else {
+            log.info("Topic already exists for roomId={}", roomId);
+        }
     }
 
 
     public ChannelTopic getTopic(String roomId) {
-        return topics.get(roomId);
+        ChannelTopic topic = topics.get(roomId);
+        if (topic == null) {
+            log.warn("Topic not found for roomId={}", roomId);
+        }
+        return topic;
     }
 }

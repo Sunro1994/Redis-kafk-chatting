@@ -62,39 +62,68 @@
             this.findRoom();
         },
         methods: {
-            findRoom: function() {
-                axios.get('/chat/room/'+this.roomId).then(response => { this.room = response.data; });
+            findRoom: function () {
+                axios.get('/chat/room/' + this.roomId).then(response => {
+                    this.room = response.data;
+                });
             },
-            sendMessage: function() {
-                ws.send("/pub/chat/message", {}, JSON.stringify({type:'TALK', roomId:this.roomId, sender:this.sender, message:this.message}));
+            sendMessage: function () {
+                ws.send("/pub/chat/message", {}, JSON.stringify({
+                    type: 'TALK',
+                    roomId: this.roomId,
+                    sender: this.sender,
+                    message: this.message
+                }));
                 this.message = '';
             },
-            recvMessage: function(recv) {
-                log.info(recv.message)
-                this.messages.unshift({"type":recv.type,"sender":recv.type=='ENTER'?'[알림]':recv.sender,"message":recv.message})
+            recvMessage: function (recv) {
+                this.messages.unshift({
+                    "type": recv.type,
+                    "sender": recv.type == 'ENTER' ? '[알림]' : recv.sender,
+                    "message": recv.message
+                })
             }
         }
     });
 
     function connect() {
         // pub/sub event
-        ws.connect({}, function(frame) {
-            ws.subscribe("/sub/chat/room/"+vm.$data.roomId, function(message) {
+        ws.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            ws.subscribe("/sub/chat/room/" + vm.$data.roomId, function (message) {
+                console.log('Message received: ', message);
                 var recv = JSON.parse(message.body);
                 vm.recvMessage(recv);
             });
-            ws.send("/pub/chat/message", {}, JSON.stringify({type:'ENTER', roomId:vm.$data.roomId, sender:vm.$data.sender}));
-        }, function(error) {
-            if(reconnect++ < 5) {
-                setTimeout(function() {
-                    console.log("connection reconnect");
+            ws.send(
+                "/pub/chat/message",
+                {},
+                JSON.stringify({
+                    type: 'ENTER',
+                    roomId: vm.$data.roomId,
+                    sender: vm.$data.sender
+                }));
+        }, function (error) {
+            console.log('Connection error: ', error);
+            if (reconnect++ < 5) {
+                setTimeout(function () {
                     sock = new SockJS("/ws-stomp");
                     ws = Stomp.over(sock);
                     connect();
-                },10*1000);
+                }, 10 * 1000);
             }
         });
+
+
+        ws.onclose = function (event) {
+            console.log('Connection closed: ', event);
+        };
+
+        ws.onerror = function (error) {
+            console.log('Connection error: ', error);
+        };
     }
+
     connect();
 </script>
 </body>
